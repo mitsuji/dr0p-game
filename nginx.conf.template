@@ -1,0 +1,26 @@
+# mkdir nginx_tmp
+# envsubst < nginx.conf.template > nginx.conf
+# nginx -c $PWD/nginx.conf
+
+daemon off;
+pid ${PWD}/nginx_tmp/pid;
+error_log stderr warn;
+
+events {
+}
+
+http {
+  client_body_temp_path ${PWD}/nginx_tmp/client 1 2;
+  proxy_temp_path ${PWD}/nginx_tmp/proxy 1 2;
+  fastcgi_temp_path ${PWD}/nginx_tmp/fastcgi 1 2;
+  uwsgi_temp_path ${PWD}/nginx_tmp/uwsgi 1 2;
+  scgi_temp_path ${PWD}/nginx_tmp/scgi 1 2;
+  include /etc/nginx/mime.types;
+#  access_log /dev/stdout;
+  access_log off;
+  server {  
+    listen 8080;
+#    return 200 "Hello, World!";
+    root ${PWD}/web;
+  }  
+}
