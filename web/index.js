@@ -2,7 +2,20 @@ const CANV_W = 500;
 const CANV_H = 600;
 
 
-window.onload = () => {
+window.onload = async () => {
+
+    let ballImages = {};
+    for (let i = 0; i < 10; i++) {
+        let image = new Image();
+        await new Promise((resolve,reject) => {
+            image.onload = () => {
+                resolve();
+            };
+            image.src = "size" + (i+1) + ".png";
+        });
+        ballImages[i+1] = image;
+    }
+
     let engine = Matter.Engine.create();
 
     let walls = createWalls();
@@ -15,7 +28,7 @@ window.onload = () => {
     let ballGen = createBallGen((nextBallSize) => {
         ctxtNext.clearRect(0,0,canvNext.width,canvNext.height);
         setTimeout(() => {
-            createBall(50, 50, nextBallSize).draw(ctxtNext);
+            createBall(50, 50, nextBallSize).draw(ctxtNext,ballImages);
         },500);
     });
 
@@ -24,7 +37,7 @@ window.onload = () => {
         if (ballGen.showCurrBall) {
             let size = ballGen.currBallSize;
             let r = ballRadius(size);
-            createBall(inlet.x,inlet.y+r,size).draw(context);
+            createBall(inlet.x,inlet.y+r,size).draw(context,ballImages);
         }
     }
 
@@ -88,6 +101,7 @@ window.onload = () => {
                     if(ballA.size < 10) {
                         let size = ballA.size + 1;
                         let ball = createBall(ballA.body.position.x, ballA.body.position.y, size);
+                        Matter.Body.setAngle(ball.body,ballA.body.angle);
                         creates.push(ball);
                     }
                 }
@@ -118,7 +132,7 @@ window.onload = () => {
         drawCurrBall(ctxtGame);
         
         for (let key in balls) {
-            balls[key].draw(ctxtGame);
+            balls[key].draw(ctxtGame,ballImages);
         }
 
         Matter.Engine.update(engine, 1000 / 60);
@@ -150,10 +164,23 @@ function ballRadius(size) {
 function createBall (x,y,size) {
     let o = {};
     o.size = size;
-    let r = ballRadius(size);
-    o.body = Matter.Bodies.circle(x,y,r);
+    o.r = ballRadius(size);
+    o.body = Matter.Bodies.circle(x,y,o.r);
 
-    o.draw = function (context) {
+    o.draw = function (context,ballImages) {
+        let image = ballImages[this.size];
+        let wh = this.r *2;
+        let x = this.body.position.x - this.r;
+        let y = this.body.position.y - this.r;
+        let tx = x+this.r;
+        let ty = y+this.r
+        context.translate(tx,ty);
+        context.rotate(this.body.angle);
+        context.translate(-tx,-ty);
+        context.drawImage(image,x,y,wh,wh);
+        context.setTransform(1, 0, 0, 1, 0, 0);
+    };
+    o.drawModel = function (context) {
         let vertices = this.body.vertices;
         let vertice0 = vertices[0];
         let color;
