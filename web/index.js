@@ -11,7 +11,7 @@ window.onload = async () => {
             image.onload = () => {
                 resolve();
             };
-            image.src = "size" + (i+1) + ".png";
+            image.src = "csize" + (i+1) + ".png";
         });
         ballImages[i+1] = image;
     }
@@ -133,6 +133,7 @@ window.onload = async () => {
         
         for (let key in balls) {
             balls[key].draw(ctxtGame,ballImages);
+//            balls[key].drawModel(ctxtGame);
         }
 
         Matter.Engine.update(engine, 1000 / 60);
