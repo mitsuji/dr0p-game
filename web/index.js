@@ -1,8 +1,35 @@
-const CANV_W = 500;
+const CANV_W = 300;
 const CANV_H = 600;
 
 
-window.onload = () => {
+window.onload = async () => {
+
+    let ballImages = {};
+    for (let i = 0; i < 10; i++) {
+        let image = new Image();
+        await new Promise((resolve,reject) => {
+            image.onload = () => {
+                resolve();
+            };
+            image.src = "csize" + (i+1) + ".png";
+        });
+        ballImages[i+1] = image;
+    }
+    let ulSample = document.getElementById("ulsample");
+    for (let key in ballImages) {
+        let ballImage = ballImages[key];
+        ballImage.width = 50;
+        let li = document.createElement("li");
+        let span = document.createElement("span");
+        span.innerText = key;
+        li.append(ballImage);
+        li.append(span);
+        ulSample.append(li);
+    };
+
+//    let engine = Matter.Engine.create({
+//        enableSleeping: true
+//    });
     let engine = Matter.Engine.create();
 
     let walls = createWalls();
@@ -15,26 +42,41 @@ window.onload = () => {
     let ballGen = createBallGen((nextBallSize) => {
         ctxtNext.clearRect(0,0,canvNext.width,canvNext.height);
         setTimeout(() => {
-            createBall(50, 50, nextBallSize).draw(ctxtNext);
+            createBall(50, 50, nextBallSize).draw(ctxtNext,ballImages);
         },500);
     });
 
-    let inlet = createInlet(CANV_W/2,50);
+    let inlet = createInlet(CANV_W/2,10);
+    let balls = {};
+    let score = 0;
     let drawCurrBall = (context) => {
         if (ballGen.showCurrBall) {
             let size = ballGen.currBallSize;
             let r = ballRadius(size);
-            createBall(inlet.x,inlet.y+r,size).draw(context);
+            createBall(inlet.x,inlet.y+r,size).draw(context,ballImages);
         }
+    };
+    let showScore = () => {
+        let spanScore = document.getElementById('spanscore');
+        spanScore.innerText = score;
     }
-
-    let balls = {};
+    showScore();
     let dropBall = (size) => {
         let r = ballRadius(size);
         let ball = createBall(inlet.x,inlet.y+r,size);
         balls[ball.body.id] = ball;
         Matter.Composite.add(engine.world,ball.body);
-    }
+    };
+    let reset = () => {
+        for(let key in balls) {
+            let ball = balls[key];
+            Matter.Composite.remove(engine.world, ball.body);
+        }
+        balls = {};
+        inlet.x = CANV_W/2;
+        score = 0;
+        showScore();
+    };
 
     document.getElementById("canvgame").addEventListener("mousemove", (event) => {
         inlet.x = event.offsetX;
@@ -88,8 +130,10 @@ window.onload = () => {
                     if(ballA.size < 10) {
                         let size = ballA.size + 1;
                         let ball = createBall(ballA.body.position.x, ballA.body.position.y, size);
+                        Matter.Body.setAngle(ball.body,ballA.body.angle);
                         creates.push(ball);
                     }
+                    score += ballA.size * 10;
                 }
             }
         }
@@ -104,12 +148,14 @@ window.onload = () => {
             balls[ball.body.id] = ball;
             Matter.Composite.add(engine.world,ball.body);
         }
+        showScore();
     });
 
     let canvGame = document.getElementById('canvgame');
     canvGame.width  = CANV_W;
     canvGame.height = CANV_H;
     let ctxtGame = canvGame.getContext('2d');
+
     let render = (ts) => {
         ctxtGame.clearRect(0, 0, canvGame.width, canvGame.height);
 
@@ -118,12 +164,24 @@ window.onload = () => {
         drawCurrBall(ctxtGame);
         
         for (let key in balls) {
-            balls[key].draw(ctxtGame);
+            balls[key].draw(ctxtGame,ballImages);
+//            balls[key].drawModel(ctxtGame);
         }
-
+        let hasOverFlow = false;
+        for (let key in balls) {
+            let ball = balls[key];
+            let balltop = ball.body.position.y - ball.r;
+            if(balltop < inlet.y) {
+                hasOverFlow = true;
+                break;
+            }
+        }
+        if(hasOverFlow) {
+            alert("Game Over...\nYour Score is " + score);
+            reset();
+        }
         Matter.Engine.update(engine, 1000 / 60);
         window.requestAnimationFrame(render);
-
     };
     window.requestAnimationFrame(render);
 
@@ -133,16 +191,16 @@ window.onload = () => {
 function ballRadius(size) {
     let r;
     switch(size) {
-    case  1: { r =  10; break; }
-    case  2: { r =  20; break; }
-    case  3: { r =  30; break; }
-    case  4: { r =  40; break; }
-    case  5: { r =  50; break; }
-    case  6: { r =  65; break; }
-    case  7: { r =  85; break; }
-    case  8: { r = 110; break; }
-    case  9: { r = 150; break; }
-    case 10: { r = 200; break; }
+    case  1: { r =  20; break; }
+    case  2: { r =  30; break; }
+    case  3: { r =  40; break; }
+    case  4: { r =  50; break; }
+    case  5: { r =  60; break; }
+    case  6: { r =  70; break; }
+    case  7: { r =  80; break; }
+    case  8: { r =  90; break; }
+    case  9: { r = 100; break; }
+    case 10: { r = 110; break; }
     }
     return r;
 }
@@ -150,10 +208,23 @@ function ballRadius(size) {
 function createBall (x,y,size) {
     let o = {};
     o.size = size;
-    let r = ballRadius(size);
-    o.body = Matter.Bodies.circle(x,y,r);
+    o.r = ballRadius(size);
+    o.body = Matter.Bodies.circle(x,y,o.r);
 
-    o.draw = function (context) {
+    o.draw = function (context,ballImages) {
+        let image = ballImages[this.size];
+        let wh = this.r *2;
+        let x = this.body.position.x - this.r;
+        let y = this.body.position.y - this.r;
+        let tx = x+this.r;
+        let ty = y+this.r
+        context.translate(tx,ty);
+        context.rotate(this.body.angle);
+        context.translate(-tx,-ty);
+        context.drawImage(image,x,y,wh,wh);
+        context.setTransform(1, 0, 0, 1, 0, 0);
+    };
+    o.drawModel = function (context) {
         let vertices = this.body.vertices;
         let vertice0 = vertices[0];
         let color;
@@ -192,7 +263,7 @@ function createBall (x,y,size) {
 
 
 function createBallGen (fOnPrepare) {
-    const randomBallSize = () => (Math.floor(Math.random() *4) +1);
+    const randomBallSize = () => (Math.floor(Math.random() *3) +1);
     let o = {};
     o.currBallSize = randomBallSize();
     o.nextBallSize = randomBallSize();
