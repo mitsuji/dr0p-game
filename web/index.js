@@ -33,21 +33,36 @@ window.onload = async () => {
     });
 
     let inlet = createInlet(CANV_W/2,50);
+    let balls = {};
+    let score = 0;
     let drawCurrBall = (context) => {
         if (ballGen.showCurrBall) {
             let size = ballGen.currBallSize;
             let r = ballRadius(size);
             createBall(inlet.x,inlet.y+r,size).draw(context,ballImages);
         }
+    };
+    let showScore = () => {
+        let spanScore = document.getElementById('spanscore');
+        spanScore.innerText = score;
     }
-
-    let balls = {};
+    showScore();
     let dropBall = (size) => {
         let r = ballRadius(size);
         let ball = createBall(inlet.x,inlet.y+r,size);
         balls[ball.body.id] = ball;
         Matter.Composite.add(engine.world,ball.body);
-    }
+    };
+    let reset = () => {
+        for(let key in balls) {
+            let ball = balls[key];
+            Matter.Composite.remove(engine.world, ball.body);
+        }
+        balls = {};
+        inlet.x = CANV_W/2;
+        score = 0;
+        showScore();
+    };
 
     document.getElementById("canvgame").addEventListener("mousemove", (event) => {
         inlet.x = event.offsetX;
@@ -104,6 +119,7 @@ window.onload = async () => {
                         Matter.Body.setAngle(ball.body,ballA.body.angle);
                         creates.push(ball);
                     }
+                    score += ballA.size * 10;
                 }
             }
         }
@@ -118,12 +134,14 @@ window.onload = async () => {
             balls[ball.body.id] = ball;
             Matter.Composite.add(engine.world,ball.body);
         }
+        showScore();
     });
 
     let canvGame = document.getElementById('canvgame');
     canvGame.width  = CANV_W;
     canvGame.height = CANV_H;
     let ctxtGame = canvGame.getContext('2d');
+
     let render = (ts) => {
         ctxtGame.clearRect(0, 0, canvGame.width, canvGame.height);
 
@@ -136,9 +154,20 @@ window.onload = async () => {
 //            balls[key].drawModel(ctxtGame);
         }
 
+        let hasOverFlow = false;
+        for (let key in balls) {
+            let ball = balls[key];
+            if((ball.body.position.y - ball.r) < 50) {
+                hasOverFlow = true;
+                break;
+            }
+        }
+        if(hasOverFlow) {
+            alert("Game Over...\nYour Score is " + score);
+            reset();
+        }
         Matter.Engine.update(engine, 1000 / 60);
         window.requestAnimationFrame(render);
-
     };
     window.requestAnimationFrame(render);
 
@@ -148,16 +177,16 @@ window.onload = async () => {
 function ballRadius(size) {
     let r;
     switch(size) {
-    case  1: { r =  10; break; }
-    case  2: { r =  20; break; }
-    case  3: { r =  30; break; }
-    case  4: { r =  40; break; }
-    case  5: { r =  50; break; }
-    case  6: { r =  65; break; }
-    case  7: { r =  85; break; }
-    case  8: { r = 110; break; }
-    case  9: { r = 150; break; }
-    case 10: { r = 200; break; }
+    case  1: { r =  20; break; }
+    case  2: { r =  40; break; }
+    case  3: { r =  45; break; }
+    case  4: { r =  55; break; }
+    case  5: { r =  70; break; }
+    case  6: { r =  80; break; }
+    case  7: { r =  95; break; }
+    case  8: { r = 115; break; }
+    case  9: { r = 135; break; }
+    case 10: { r = 160; break; }
     }
     return r;
 }
@@ -220,7 +249,7 @@ function createBall (x,y,size) {
 
 
 function createBallGen (fOnPrepare) {
-    const randomBallSize = () => (Math.floor(Math.random() *4) +1);
+    const randomBallSize = () => (Math.floor(Math.random() *3) +1);
     let o = {};
     o.currBallSize = randomBallSize();
     o.nextBallSize = randomBallSize();
