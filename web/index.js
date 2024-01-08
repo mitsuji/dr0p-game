@@ -156,16 +156,15 @@ window.onload = async () => {
             balls[key].draw(ctxtGame,ballImages);
 //            balls[key].drawModel(ctxtGame);
         }
-
         let hasOverFlow = false;
-//        for (let key in balls) {
-//            let ball = balls[key];
-//            let balltop = ball.body.position.y - ball.r;
-//            if(ball.body.isSleeping && 10 < balltop && balltop < 50) {
-//                hasOverFlow = true;
-//                break;
-//            }
-//        }
+        for (let key in balls) {
+            let ball = balls[key];
+            let balltop = ball.body.position.y - ball.r;
+            if(balltop < inlet.y) {
+                hasOverFlow = true;
+                break;
+            }
+        }
         if(hasOverFlow) {
             alert("Game Over...\nYour Score is " + score);
             reset();
