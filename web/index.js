@@ -1,4 +1,4 @@
-const CANV_W = 500;
+const CANV_W = 300;
 const CANV_H = 600;
 
 
@@ -16,6 +16,9 @@ window.onload = async () => {
         ballImages[i+1] = image;
     }
 
+//    let engine = Matter.Engine.create({
+//        enableSleeping: true
+//    });
     let engine = Matter.Engine.create();
 
     let walls = createWalls();
@@ -32,7 +35,7 @@ window.onload = async () => {
         },500);
     });
 
-    let inlet = createInlet(CANV_W/2,50);
+    let inlet = createInlet(CANV_W/2,10);
     let balls = {};
     let score = 0;
     let drawCurrBall = (context) => {
@@ -155,13 +158,14 @@ window.onload = async () => {
         }
 
         let hasOverFlow = false;
-        for (let key in balls) {
-            let ball = balls[key];
-            if((ball.body.position.y - ball.r) < 50) {
-                hasOverFlow = true;
-                break;
-            }
-        }
+//        for (let key in balls) {
+//            let ball = balls[key];
+//            let balltop = ball.body.position.y - ball.r;
+//            if(ball.body.isSleeping && 10 < balltop && balltop < 50) {
+//                hasOverFlow = true;
+//                break;
+//            }
+//        }
         if(hasOverFlow) {
             alert("Game Over...\nYour Score is " + score);
             reset();
@@ -178,15 +182,15 @@ function ballRadius(size) {
     let r;
     switch(size) {
     case  1: { r =  20; break; }
-    case  2: { r =  40; break; }
-    case  3: { r =  45; break; }
-    case  4: { r =  55; break; }
-    case  5: { r =  70; break; }
-    case  6: { r =  80; break; }
-    case  7: { r =  95; break; }
-    case  8: { r = 115; break; }
-    case  9: { r = 135; break; }
-    case 10: { r = 160; break; }
+    case  2: { r =  30; break; }
+    case  3: { r =  40; break; }
+    case  4: { r =  50; break; }
+    case  5: { r =  60; break; }
+    case  6: { r =  70; break; }
+    case  7: { r =  80; break; }
+    case  8: { r =  90; break; }
+    case  9: { r = 100; break; }
+    case 10: { r = 110; break; }
     }
     return r;
 }
