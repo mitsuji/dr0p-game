@@ -1,16 +1,43 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <!-- meta name="viewport" content="width=device-width,initial-scale=1" -->
+    <meta name="viewport" content="width=500,initial-scale=1">
+    <meta charset="UTF-8">
+    <title>dr0p game</title>
     <script src="matter.js"></script>
     <script src="index.js"></script>
     <style>
-      .container{
+      .container {
           display: flex;
           flex-direction:row
           justify-content: space-around;
       }
-      .container > div{
-          margin: 1em;
+      .container > div {
+          margin: 0 10px;
+      }
+      .container > div > div {
+          margin-bottom: 20px;
+      }
+      .container > div > div > div.title {
+          text-align:center;
+          border: 2px solid #c0c0c0;
+          color:white;
+          background-color: #c0c0c0;
+      }
+      .container > div > div > div.content {
+          border: 2px solid #c0c0c0;
+      }
+      #ulsample {
+          column-count: 2;
+          padding-left: 0;
+          margin: 10px 10px;
+      }
+      #ulsample > li {
+          list-style-type: none;
+      }
+      #ulsample > li > span {
+          vertical-align: top;
       }
     </style>
   </head>
@@ -21,15 +48,21 @@
       </div>
       <div>
         <div>
-          <div style="text-align:center;">Next</div>
-          <div>
+          <div class="title">Next</div>
+          <div class="content" style="text-align:center;">
             <canvas id="canvnext"></canvas>
           </div>
         </div>
         <div>
-          <div style="text-align:center;">Score</div>
-          <div style="text-align:right;">
+          <div class="title">Score</div>
+          <div class="content" style="text-align:right;">
             <span id="spanscore"></span>
+          </div>
+        </div>
+        <div>
+          <div class="title">Sample</div>
+          <div class="content">
+            <ul id="ulsample"></ul>
           </div>
         </div>
       </div>

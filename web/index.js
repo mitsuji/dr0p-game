@@ -15,6 +15,17 @@ window.onload = async () => {
         });
         ballImages[i+1] = image;
     }
+    let ulSample = document.getElementById("ulsample");
+    for (let key in ballImages) {
+        let ballImage = ballImages[key];
+        ballImage.width = 50;
+        let li = document.createElement("li");
+        let span = document.createElement("span");
+        span.innerText = key;
+        li.append(ballImage);
+        li.append(span);
+        ulSample.append(li);
+    };
 
 //    let engine = Matter.Engine.create({
 //        enableSleeping: true
