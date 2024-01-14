@@ -165,7 +165,6 @@ window.onload = async () => {
         
         for (let key in balls) {
             balls[key].draw(ctxtGame,ballImages);
-//            balls[key].drawModel(ctxtGame);
         }
         let hasOverFlow = false;
         for (let key in balls) {
@@ -212,6 +211,8 @@ function createBall (x,y,size) {
     o.body = Matter.Bodies.circle(x,y,o.r);
 
     o.draw = function (context,ballImages) {
+//        this.drawModel(context)
+//        return;
         let image = ballImages[this.size];
         let wh = this.r *2;
         let x = this.body.position.x - this.r;
@@ -252,8 +253,11 @@ function createBall (x,y,size) {
 
         context.beginPath();
         context.moveTo(this.body.position.x, this.body.position.y);
-        context.lineTo(vertice0.x, vertice0.y);
-        context.lineWidth = 3;
+        let angle0 = this.body.angle - (Math.PI/2);
+        let ax = Math.cos(angle0) * this.r + this.body.position.x;
+        let ay = Math.sin(angle0) * this.r + this.body.position.y;
+        context.lineTo(ax, ay);
+        context.lineWidth = 2;
         context.strokeStyle = "#ffffff";
         context.stroke();
     };
