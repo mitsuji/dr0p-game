@@ -3,7 +3,9 @@ const CANV_H = 600;
 
 
 window.onload = async () => {
-
+//    Matter.Common.setDecomp(require('poly-decomp'));
+//    Matter.Common.setDecomp(poly_decomp);
+    
     let vertexSvgs;
     {
         let select = (doc, selector) => {
@@ -22,7 +24,8 @@ window.onload = async () => {
                 "image/svg/iconmonstr-paperclip-2-icon.svg",
                 "image/svg/iconmonstr-puzzle-icon.svg",
                 "image/svg/iconmonstr-user-icon.svg",
-                "image/svg/svg.svg"
+                "image/svg/svg.svg",
+                "image/svg/charN.svg"
             ];
             let svgs = [];
             for(let i = 0; i < svgFiles.length; i++) {
@@ -34,7 +37,7 @@ window.onload = async () => {
                 svgs.push(vertices);
             }
             for(let i = 0; i < svgs.length; i++) {
-                if(i != 4) {
+                if(![4,5].includes(i)) {
                     let svg = svgs[i];
                     svgs[i] = svg.map((vertices) => {
                         return Matter.Vertices.scale(vertices, 0.4, 0.4);
@@ -198,13 +201,19 @@ window.onload = async () => {
     canvGame.height = CANV_H;
     let ctxtGame = canvGame.getContext('2d');
 
-    let bodySvg = Matter.Bodies.fromVertices(150, 300, vertexSvgs[3], { isStatic: true });
+    let bodySvg = Matter.Bodies.fromVertices(150, 300, vertexSvgs[5], { isStatic: true });
     Matter.Composite.add(engine.world, bodySvg);
 
     let render = (ts) => {
         ctxtGame.clearRect(0, 0, canvGame.width, canvGame.height);
 
-        fillBody(ctxtGame, bodySvg, "#FF0000");
+//        fillBody(ctxtGame, bodySvg, "#FF0000");
+        fillVertices(ctxtGame, bodySvg.parts[1].vertices, "#ff0000");
+        fillVertices(ctxtGame, bodySvg.parts[2].vertices, "#00ff00");
+        console.log(bodySvg.parts[2].vertices);
+        fillVertices(ctxtGame, bodySvg.parts[3].vertices, "#0000ff");
+        fillVertices(ctxtGame, bodySvg.parts[4].vertices, "#00ffff");
+        fillVertices(ctxtGame, bodySvg.parts[5].vertices, "#ff00ff");
 
         walls.draw(ctxtGame);
         inlet.draw(ctxtGame);
@@ -227,7 +236,7 @@ window.onload = async () => {
             reset();
         }
         Matter.Engine.update(engine, 1000 / 60);
-        window.requestAnimationFrame(render);
+//        window.requestAnimationFrame(render);
     };
     window.requestAnimationFrame(render);
 
@@ -254,6 +263,7 @@ function ballRadius(size) {
 function fillBody(context, body, color) {
     for(let i = 0; i < body.parts.length; i++) {
         if (i != 0){ // parts[0] self reference
+            console.log(body.parts[i].vertices);
             fillVertices(context, body.parts[i].vertices, color);
         }
     }
@@ -268,8 +278,10 @@ function fillVertices(context, vertices, color) {
         context.lineTo(vertice.x, vertice.y);
     }
     context.lineTo(vertice0.x, vertice0.y);
-    context.fillStyle = color;
-    context.fill();
+//    context.fillStyle = color;
+//    context.fill();
+    context.strokeStyle = color;
+    context.stroke();
 }
 
 function createBall (x,y,size) {
