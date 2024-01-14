@@ -4,6 +4,47 @@ const CANV_H = 600;
 
 window.onload = async () => {
 
+    let vertexSvgs;
+    {
+        let select = (doc, selector) => {
+            return Array.prototype.slice.call(doc.querySelectorAll(selector));
+        };
+
+        let loadSvg = async (url) =>{
+            let response = await fetch(url);
+            let raw = await response.text();
+            return new window.DOMParser().parseFromString(raw, "image/svg+xml");
+        };
+
+        {
+            let svgFiles = [
+                "image/svg/iconmonstr-check-mark-8-icon.svg",
+                "image/svg/iconmonstr-paperclip-2-icon.svg",
+                "image/svg/iconmonstr-puzzle-icon.svg",
+                "image/svg/iconmonstr-user-icon.svg",
+                "image/svg/svg.svg"
+            ];
+            let svgs = [];
+            for(let i = 0; i < svgFiles.length; i++) {
+                let svgFile = svgFiles[i];
+                let doc = await loadSvg(svgFile);
+                let vertices = select(doc, "path").map ((path) => {
+                    return Matter.Svg.pathToVertices(path,30);
+                });
+                svgs.push(vertices);
+            }
+            for(let i = 0; i < svgs.length; i++) {
+                if(i != 4) {
+                    let svg = svgs[i];
+                    svgs[i] = svg.map((vertices) => {
+                        return Matter.Vertices.scale(vertices, 0.4, 0.4);
+                    });
+                }
+            }
+            vertexSvgs = svgs;
+        }
+    }
+
     let ballImages = {};
     for (let i = 0; i < 10; i++) {
         let image = new Image();
@@ -157,8 +198,13 @@ window.onload = async () => {
     canvGame.height = CANV_H;
     let ctxtGame = canvGame.getContext('2d');
 
+    let bodySvg = Matter.Bodies.fromVertices(150, 300, vertexSvgs[3], { isStatic: true });
+    Matter.Composite.add(engine.world, bodySvg);
+
     let render = (ts) => {
         ctxtGame.clearRect(0, 0, canvGame.width, canvGame.height);
+
+        fillBody(ctxtGame, bodySvg, "#FF0000");
 
         walls.draw(ctxtGame);
         inlet.draw(ctxtGame);
@@ -203,6 +249,14 @@ function ballRadius(size) {
     case 10: { r = 110; break; }
     }
     return r;
+}
+
+function fillBody(context, body, color) {
+    for(let i = 0; i < body.parts.length; i++) {
+        if (i != 0){ // parts[0] self reference
+            fillVertices(context, body.parts[i].vertices, color);
+        }
+    }
 }
 
 function fillVertices(context, vertices, color) {
