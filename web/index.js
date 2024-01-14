@@ -205,6 +205,19 @@ function ballRadius(size) {
     return r;
 }
 
+function fillVertices(context, vertices, color) {
+    let vertice0 = vertices[0];
+    context.beginPath();
+    context.moveTo(vertice0.x, vertice0.y);
+    for (let i = 1; i < vertices.length; i++) {
+        let vertice = vertices[i];
+        context.lineTo(vertice.x, vertice.y);
+    }
+    context.lineTo(vertice0.x, vertice0.y);
+    context.fillStyle = color;
+    context.fill();
+}
+
 function createBall (x,y,size) {
     let o = {};
     o.size = size;
@@ -228,7 +241,6 @@ function createBall (x,y,size) {
     };
     o.drawModel = function (context) {
         let vertices = this.body.vertices;
-        let vertice0 = vertices[0];
         let color;
         switch (this.size) {
         case  1: { color = "#ff0000"; break; }
@@ -242,15 +254,7 @@ function createBall (x,y,size) {
         case  9: { color = "#000088"; break; }
         case 10: { color = "#440000"; break; }
         }
-        context.beginPath();
-        context.moveTo(vertice0.x, vertice0.y);
-        for (let i = 1; i < vertices.length; i++) {
-            let vertice = vertices[i];
-            context.lineTo(vertice.x, vertice.y);
-        }
-        context.lineTo(vertice0.x, vertice0.y);
-        context.fillStyle = color;
-        context.fill();
+        fillVertices(context, vertices, color);
 
         context.beginPath();
         context.moveTo(this.body.position.x, this.body.position.y);
@@ -322,15 +326,7 @@ function createWalls () {
     o.draw = function (context) {
         let drawBody = (body) => {
             let vertices = body.vertices;
-
-            context.beginPath();
-            context.moveTo(vertices[0].x, vertices[0].y);
-            for (let j = 1; j < vertices.length; j++) {
-                context.lineTo(vertices[j].x, vertices[j].y);
-            }
-            context.lineTo(vertices[0].x, vertices[0].y);
-            context.fillStyle = '#C0C0C0';
-            context.fill();
+            fillVertices(context, vertices, "#C0C0C0");
         };
         drawBody(this.lBody);
         drawBody(this.rBody);
