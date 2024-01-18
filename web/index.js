@@ -11,7 +11,7 @@ window.onload = async () => {
             image.onload = () => {
                 resolve();
             };
-//            image.src = "image/dummy1/size" + (i+1) + ".png";
+//            image.src = "image/dummy1/size" + (i+1) + ".svg";
             image.src = "image/chaichan/size" + (i+1) + ".svg";
         });
         ballImages[i+1] = image;
