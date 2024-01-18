@@ -12,7 +12,7 @@ window.onload = async () => {
                 resolve();
             };
 //            image.src = "image/dummy1/size" + (i+1) + ".png";
-            image.src = "image/chaichan/size" + (i+1) + ".png";
+            image.src = "image/chaichan/size" + (i+1) + ".svg";
         });
         ballImages[i+1] = image;
     }
